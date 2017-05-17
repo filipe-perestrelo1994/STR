@@ -1,0 +1,1395 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml>
+  <net id="n0">
+    <name>
+      <text>CarWash</text>
+    </name>
+    <import>
+      <text>import javax.swing.*;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;</text>
+    </import>
+    <declaration>
+      <text>boolean ports_ok=false;
+
+boolean simple_wash_selected=false;
+boolean complete_wash_selected=false;
+boolean power_down_selected=false;
+boolean stop_selected=false;
+boolean resume_selected=false;
+boolean is_washing=false;
+
+int estado;
+
+boolean choice_done=false;
+boolean up_down_behaviour=false;
+
+public void go_right()
+{
+  trab2.Hardware.enter_critical_area();
+  
+  int v = trab2.Hardware.s_read_port(2);
+  v = trab2.Hardware.setBitValue(v, 0, true);
+  v = trab2.Hardware.setBitValue(v, 1, false);
+  trab2.Hardware.s_write_port(2, v);
+  
+  trab2.Hardware.exit_critical_area();
+}
+
+
+public void go_left()
+{
+  trab2.Hardware.enter_critical_area();
+  int v = trab2.Hardware.s_read_port(2);
+  v = trab2.Hardware.setBitValue(v,0,false);
+  v = trab2.Hardware.setBitValue(v, 1, true);
+  trab2.Hardware.s_write_port(2, v); 
+
+  trab2.Hardware.exit_critical_area(); 
+
+}
+
+public void brushes_working()
+{
+trab2.Hardware.enter_critical_area();
+
+int v = trab2.Hardware.s_read_port(2);
+
+v = trab2.Hardware.setBitValue(v, 4, true);
+v = trab2.Hardware.setBitValue(v, 5, true);
+
+trab2.Hardware.s_write_port(2, v);
+
+trab2.Hardware.exit_critical_area();
+}
+
+public void brushes_stop_working()
+{
+trab2.Hardware.enter_critical_area();
+
+int v = trab2.Hardware.s_read_port(2);
+
+v = trab2.Hardware.setBitValue(v, 4, false);
+v = trab2.Hardware.setBitValue(v, 5, false);
+
+trab2.Hardware.s_write_port(2, v);
+
+trab2.Hardware.exit_critical_area();
+}</text>
+    </declaration>
+    <place id="p50" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 1, true);&#10;v = trab2.Hardware.setBitValue(v, 0, false);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="825" y="395"/>
+      </graphics>
+      <name>
+        <text>go_left</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p52" placeCODE="simple_wash_selected=false;&#10;is_washing =false;&#10;&#10;trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;v = trab2.Hardware.setBitValue(v, 3, false);&#10;&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;return true;&#10;&#10;&#10;">
+      <graphics>
+        <position x="835" y="595"/>
+      </graphics>
+      <name>
+        <text>stop_simple_wash</text>
+        <graphics>
+          <offset x="10" y="30"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p51" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 3, true);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;v = trab2.Hardware.setBitValue(v, 1, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="835" y="485"/>
+      </graphics>
+      <name>
+        <text>go_down</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o35" source="t88" target="p81">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="595" y="270"/>
+        <position x="517" y="227"/>
+      </graphics>
+    </arc>
+    <transition id="t54">
+      <graphics>
+        <position x="895" y="345"/>
+      </graphics>
+      <name>
+        <text>reached_up</text>
+        <graphics>
+          <offset x="0" y="10"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_up = !trab2.Hardware.getBitValue(v,4); 
+return is_at_up;</text>
+      </guard>
+    </transition>
+    <transition id="t53">
+      <graphics>
+        <position x="885" y="265"/>
+      </graphics>
+      <name>
+        <text>reached_right</text>
+        <graphics>
+          <offset x="30" y="10"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_right = !trab2.Hardware.getBitValue(v,6); 
+return is_at_right;</text>
+      </guard>
+    </transition>
+    <transition id="t56">
+      <graphics>
+        <position x="905" y="535"/>
+      </graphics>
+      <name>
+        <text>reached_down</text>
+        <graphics>
+          <offset x="10" y="10"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+
+boolean sees_floor = !trab2.Hardware.getBitValue(v,3);  
+return sees_floor;</text>
+      </guard>
+    </transition>
+    <transition id="t55">
+      <graphics>
+        <position x="905" y="435"/>
+      </graphics>
+      <name>
+        <text>reached_left</text>
+        <graphics>
+          <offset x="40" y="10"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_left = !trab2.Hardware.getBitValue(v,5); 
+return is_at_left;</text>
+      </guard>
+    </transition>
+    <place id="p313" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;trab2.Hardware.s_write_port(2, estado);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;resume_selected=false;&#10;&#10;return true;">
+      <graphics>
+        <position x="335" y="1695"/>
+      </graphics>
+      <name>
+        <text>resume_everything</text>
+        <graphics>
+          <offset x="110" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="i249" source="p245" target="t246">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="835" y="101"/>
+        <position x="835" y="150"/>
+      </graphics>
+    </arc>
+    <place id="p271" placeCODE="simple_wash_selected=false;&#10;complete_wash_selected=false;&#10;is_washing =false;&#10;&#10;trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 1, false);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;v = trab2.Hardware.setBitValue(v, 3, false);&#10;&#10;&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;System.exit(1);&#10;&#10;return true;">
+      <graphics>
+        <position x="465" y="1435"/>
+      </graphics>
+      <name>
+        <text>stop_everything</text>
+        <graphics>
+          <offset x="100" y="10"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p265" placeCODE="brushes_stop_working();&#10;go_left();&#10;up_down_behaviour=true;&#10;&#10;return true;&#10;&#10;&#10;">
+      <graphics>
+        <position x="725" y="1575"/>
+      </graphics>
+      <name>
+        <text>go_left_stop</text>
+        <graphics>
+          <offset x="90" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p264" placeCODE="return true;">
+      <graphics>
+        <position x="725" y="1435"/>
+      </graphics>
+      <name>
+        <text>POWER_DOWN</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <arc id="o457" source="t292" target="p292">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="270" y="1635"/>
+        <position x="211" y="1635"/>
+      </graphics>
+    </arc>
+    <transition id="t66">
+      <graphics>
+        <position x="735" y="265"/>
+      </graphics>
+      <name>
+        <text>t66</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return true;</text>
+      </guard>
+    </transition>
+    <arc id="o455" source="t281" target="p313">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="335" y="1800"/>
+        <position x="335" y="1721"/>
+      </graphics>
+    </arc>
+    <arc id="i352" source="p265" target="t277">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="699" y="1570"/>
+        <position x="520" y="1539"/>
+      </graphics>
+    </arc>
+    <arc id="i90" source="p80" target="t85">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="495" y="91"/>
+        <position x="495" y="150"/>
+      </graphics>
+    </arc>
+    <arc id="i94" source="p82" target="t87">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="400" y="409"/>
+        <position x="480" y="421"/>
+      </graphics>
+    </arc>
+    <arc id="o57" source="t246" target="p48">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="835" y="160"/>
+        <position x="834" y="189"/>
+      </graphics>
+    </arc>
+    <arc id="i18" source="p12" target="t15">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="165" y="341"/>
+        <position x="165" y="360"/>
+      </graphics>
+    </arc>
+    <arc id="o59" source="t53" target="p49">
+      <expression>
+        <text>1@0</text>
+      </expression>
+      <graphics>
+        <position x="878" y="270"/>
+        <position x="854" y="288"/>
+      </graphics>
+    </arc>
+    <arc id="i20" source="p13" target="t16">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="142" y="436"/>
+        <position x="74" y="470"/>
+      </graphics>
+    </arc>
+    <place id="p81" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;v = trab2.Hardware.setBitValue(v, 3, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;//must be outside critical area,&#10;//otherwise affects the other behaviors&#10;trab2.Hardware.sleep(100);&#10;&#10;return true;">
+      <graphics>
+        <position x="495" y="215"/>
+      </graphics>
+      <name>
+        <text>STOP_up_down</text>
+        <graphics>
+          <offset x="90" y="-10"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p292" placeCODE="return true;">
+      <graphics>
+        <position x="185" y="1635"/>
+      </graphics>
+      <name>
+        <text>STOP</text>
+        <graphics>
+          <offset x="10" y="-40"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <transition id="t254">
+      <graphics>
+        <position x="265" y="885"/>
+      </graphics>
+      <name>
+        <text>t254</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return true;</text>
+      </guard>
+    </transition>
+    <arc id="i22" source="p14" target="t17">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="187" y="512"/>
+        <position x="245" y="480"/>
+      </graphics>
+    </arc>
+    <place id="p80" placeCODE="System.out.println(&quot;Starting up/down behavior&quot;);&#10;return true;">
+      <graphics>
+        <position x="495" y="65"/>
+      </graphics>
+      <name>
+        <text>UP_DOWN_behavior</text>
+        <graphics>
+          <offset x="3" y="-39"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <transition id="t253">
+      <graphics>
+        <position x="465" y="1255"/>
+      </graphics>
+      <name>
+        <text>reached_left2</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_left = !trab2.Hardware.getBitValue(v,5); 
+return is_at_left;</text>
+      </guard>
+    </transition>
+    <place id="p82" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 2, true);&#10;v = trab2.Hardware.setBitValue(v, 3, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;//must be outside critical area,&#10;//otherwise affects the other behaviors&#10;trab2.Hardware.sleep(100);&#10;&#10;return true;">
+      <graphics>
+        <position x="375" y="405"/>
+      </graphics>
+      <name>
+        <text>going_up</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o61" source="t54" target="p50">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="887" y="350"/>
+        <position x="845" y="379"/>
+      </graphics>
+    </arc>
+    <transition id="t250">
+      <graphics>
+        <position x="455" y="975"/>
+      </graphics>
+      <name>
+        <text>reached_left1</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_left = !trab2.Hardware.getBitValue(v,5); 
+return is_at_left;</text>
+      </guard>
+    </transition>
+    <arc id="o63" source="t55" target="p51">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="897" y="440"/>
+        <position x="855" y="469"/>
+      </graphics>
+    </arc>
+    <arc id="i28" source="p1" target="t27">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="115" y="91"/>
+        <position x="115" y="150"/>
+      </graphics>
+    </arc>
+    <place id="p293" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;estado = trab2.Hardware.s_read_port(2);&#10;&#10;trab2.Hardware.s_write_port(2, 0);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;stop_selected=false;&#10;&#10;return true;">
+      <graphics>
+        <position x="175" y="1805"/>
+      </graphics>
+      <name>
+        <text>stop_everything</text>
+        <graphics>
+          <offset x="0" y="40"/>
+        </graphics>
+      </name>
+    </place>
+    <transition id="t251">
+      <graphics>
+        <position x="455" y="1095"/>
+      </graphics>
+      <name>
+        <text>reached_right2</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_right = !trab2.Hardware.getBitValue(v,6); 
+return is_at_right;</text>
+      </guard>
+    </transition>
+    <arc id="o65" source="t56" target="p52">
+      <expression>
+        <text>1@0</text>
+      </expression>
+      <graphics>
+        <position x="899" y="540"/>
+        <position x="854" y="578"/>
+      </graphics>
+    </arc>
+    <transition id="t85">
+      <graphics>
+        <position x="495" y="155"/>
+      </graphics>
+      <name>
+        <text>ports_ok</text>
+        <graphics>
+          <offset x="70" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return ports_ok;</text>
+      </guard>
+    </transition>
+    <arc id="o68" source="t66" target="p245">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="737" y="260"/>
+        <position x="822" y="97"/>
+      </graphics>
+    </arc>
+    <arc id="o353" source="t277" target="p271">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="493" y="1530"/>
+        <position x="472" y="1459"/>
+      </graphics>
+    </arc>
+    <transition id="t87">
+      <graphics>
+        <position x="505" y="425"/>
+      </graphics>
+      <name>
+        <text>car_and_floor_not_deteted</text>
+        <graphics>
+          <offset x="20" y="30"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+
+boolean sees_floor = !trab2.Hardware.getBitValue(v,3); 
+
+boolean sees_car  = trab2.Hardware.getBitValue(v,1) 
+                 || trab2.Hardware.getBitValue(v,2);  
+
+return !sees_floor &amp;&amp; !sees_car;</text>
+      </guard>
+    </transition>
+    <transition id="t86">
+      <graphics>
+        <position x="355" y="325"/>
+      </graphics>
+      <name>
+        <text>car_is_detected</text>
+        <graphics>
+          <offset x="63" y="16"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+
+
+
+boolean sees_car  = trab2.Hardware.getBitValue(v,1) 
+                 || trab2.Hardware.getBitValue(v,2);  
+
+return sees_car;</text>
+      </guard>
+    </transition>
+    <transition id="t88">
+      <graphics>
+        <position x="605" y="275"/>
+      </graphics>
+      <name>
+        <text>car_or_floor_detected</text>
+        <graphics>
+          <offset x="87" y="23"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+
+boolean sees_floor = !trab2.Hardware.getBitValue(v,3); 
+
+boolean sees_car  = trab2.Hardware.getBitValue(v,1) 
+                 || trab2.Hardware.getBitValue(v,2);  
+
+return sees_floor || sees_car;</text>
+      </guard>
+    </transition>
+    <transition id="t246">
+      <graphics>
+        <position x="835" y="155"/>
+      </graphics>
+      <name>
+        <text>simple_selected</text>
+        <graphics>
+          <offset x="90" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return simple_wash_selected;</text>
+      </guard>
+    </transition>
+    <arc id="i130" source="p81" target="t128">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="470" y="221"/>
+        <position x="434" y="230"/>
+      </graphics>
+    </arc>
+    <transition id="t128">
+      <graphics>
+        <position x="415" y="235"/>
+      </graphics>
+      <name>
+        <text>up_down_started</text>
+        <graphics>
+          <offset x="13" y="6"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return up_down_behaviour;</text>
+      </guard>
+    </transition>
+    <transition id="t249">
+      <graphics>
+        <position x="475" y="835"/>
+      </graphics>
+      <name>
+        <text>reached_right1</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_right = !trab2.Hardware.getBitValue(v,6); 
+return is_at_right;</text>
+      </guard>
+    </transition>
+    <transition id="t248">
+      <graphics>
+        <position x="485" y="705"/>
+      </graphics>
+      <name>
+        <text>complete_selected</text>
+        <graphics>
+          <offset x="120" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return complete_wash_selected;</text>
+      </guard>
+    </transition>
+    <arc id="i132" source="p129" target="t86">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="364" y="298"/>
+        <position x="356" y="320"/>
+      </graphics>
+    </arc>
+    <transition id="t281">
+      <graphics>
+        <position x="335" y="1805"/>
+      </graphics>
+      <name>
+        <text>resume_selected</text>
+        <graphics>
+          <offset x="50" y="30"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return resume_selected;</text>
+      </guard>
+    </transition>
+    <transition id="t280">
+      <graphics>
+        <position x="95" y="1725"/>
+      </graphics>
+      <name>
+        <text>stop_selected</text>
+        <graphics>
+          <offset x="-20" y="30"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return stop_selected;</text>
+      </guard>
+    </transition>
+    <place id="p97" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 3, true);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;//must be outside critical area,&#10;//otherwise affects the other behaviors&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="605" y="365"/>
+      </graphics>
+      <name>
+        <text>going_down</text>
+        <graphics>
+          <offset x="77" y="3"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p12" placeCODE="System.out.println(&quot;Starting left/right behavior&quot;);&#10;return true;">
+      <graphics>
+        <position x="165" y="315"/>
+      </graphics>
+      <name>
+        <text>LEFT_RIGHT_behavior</text>
+        <graphics>
+          <offset x="10" y="-50"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <place id="p14" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 1, true);&#10;v = trab2.Hardware.setBitValue(v, 0, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="165" y="525"/>
+      </graphics>
+      <name>
+        <text>going_lefft</text>
+        <graphics>
+          <offset x="68" y="5"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p13" placeCODE="trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 0, true);&#10;v = trab2.Hardware.setBitValue(v, 1, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;return true;">
+      <graphics>
+        <position x="165" y="425"/>
+      </graphics>
+      <name>
+        <text>going_right</text>
+        <graphics>
+          <offset x="70" y="-10"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="i283" source="p251" target="t250">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="466" y="939"/>
+        <position x="456" y="970"/>
+      </graphics>
+    </arc>
+    <arc id="i285" source="p252" target="t251">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="464" y="1068"/>
+        <position x="456" y="1090"/>
+      </graphics>
+    </arc>
+    <transition id="t16">
+      <graphics>
+        <position x="65" y="475"/>
+      </graphics>
+      <name>
+        <text>reached_right_position</text>
+        <graphics>
+          <offset x="18" y="5"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_right = !trab2.Hardware.getBitValue(v,6); 
+return is_at_right;</text>
+      </guard>
+    </transition>
+    <arc id="i287" source="p253" target="t253">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="471" y="1180"/>
+        <position x="465" y="1250"/>
+      </graphics>
+    </arc>
+    <arc id="i320" source="p271" target="t274">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="489" y="1427"/>
+        <position x="586" y="1400"/>
+      </graphics>
+    </arc>
+    <transition id="t15">
+      <graphics>
+        <position x="165" y="365"/>
+      </graphics>
+      <name>
+        <text>ports_ok</text>
+        <graphics>
+          <offset x="48" y="5"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return ports_ok &amp;&amp; false;</text>
+      </guard>
+    </transition>
+    <arc id="i289" source="p254" target="t254">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="273" y="1219"/>
+        <position x="265" y="890"/>
+      </graphics>
+    </arc>
+    <transition id="t17">
+      <graphics>
+        <position x="255" y="475"/>
+      </graphics>
+      <name>
+        <text>reached_left_position</text>
+        <graphics>
+          <offset x="68" y="5"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_left = !trab2.Hardware.getBitValue(v,5); 
+return is_at_left;</text>
+      </guard>
+    </transition>
+    <transition id="t270">
+      <graphics>
+        <position x="705" y="1505"/>
+      </graphics>
+      <name>
+        <text>power_down_selected</text>
+        <graphics>
+          <offset x="110" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return power_down_selected;</text>
+      </guard>
+    </transition>
+    <transition id="t277">
+      <graphics>
+        <position x="495" y="1535"/>
+      </graphics>
+      <name>
+        <text>reached_left_stop</text>
+        <graphics>
+          <offset x="-90" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>int v = trab2.Hardware.s_read_port(0);
+//sensor is active low
+boolean is_at_left = !trab2.Hardware.getBitValue(v,5); 
+return is_at_left;</text>
+      </guard>
+    </transition>
+    <transition id="t274">
+      <graphics>
+        <position x="605" y="1395"/>
+      </graphics>
+      <name>
+        <text>t274</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return true;</text>
+      </guard>
+    </transition>
+    <arc id="o131" source="t128" target="p129">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="409" y="240"/>
+        <position x="392" y="256"/>
+      </graphics>
+    </arc>
+    <transition id="t27">
+      <graphics>
+        <position x="115" y="155"/>
+      </graphics>
+      <name>
+        <text>Wash is ready </text>
+        <graphics>
+          <offset x="-4" y="22"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return true;</text>
+      </guard>
+    </transition>
+    <arc id="i397" source="p292" target="t280">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="166" y="1653"/>
+        <position x="99" y="1720"/>
+      </graphics>
+    </arc>
+    <arc id="i278" source="p250" target="t249">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="480" y="800"/>
+        <position x="475" y="830"/>
+      </graphics>
+    </arc>
+    <arc id="i311" source="p264" target="t270">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="717" y="1459"/>
+        <position x="706" y="1500"/>
+      </graphics>
+    </arc>
+    <arc id="i399" source="p293" target="t281">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="201" y="1805"/>
+        <position x="310" y="1805"/>
+      </graphics>
+    </arc>
+    <arc id="i279" source="p249" target="t248">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="485" y="651"/>
+        <position x="485" y="700"/>
+      </graphics>
+    </arc>
+    <place id="p1" placeCODE="System.out.println(&quot;Initiaziling ports&quot;);&#10;trab2.Hardware.create_di(0);&#10;trab2.Hardware.create_di(1);&#10;trab2.Hardware.create_do(2);&#10;ports_ok=true;&#10;&#10;&#10;(new JFrame() {&#10;      JLabel l;&#10;      public void start() {&#10;        l = new JLabel();&#10;        l.setText(&quot;&gt;&gt; Select Wash type  &lt;&lt;&quot;);&#10;        JButton but_simple = new JButton(&quot;Simple wash&quot;);&#10;        JButton but_complete = new JButton(&quot;Complete wash&quot;);&#10;        JButton but_stop = new JButton(&quot;stop&quot;);&#10;        JButton but_resume = new JButton(&quot;resume&quot;);&#10;        JButton but_power = new JButton(&quot;power down&quot;);&#10;        add(l);&#10;        add(but_simple);&#10;        add(but_complete);&#10;        add(but_stop);&#10;        add(but_resume);&#10;        add(but_power);&#10;        but_simple.addActionListener(new ActionListener() {&#10;          public void actionPerformed(ActionEvent e) {&#10;            l.setText(&quot;&gt;&gt; SIMPLE wash selected...  &lt;&lt;&quot;);&#10;            simple_wash_selected=true;&#10;          }&#10;        });&#10;        but_complete.addActionListener(new ActionListener() {&#10;          public void actionPerformed(ActionEvent e) {&#10;            l.setText(&quot;&gt;&gt; COMPLETE wash selected...  &lt;&lt;&quot;);&#10;&#9;    complete_wash_selected=true;&#10;          }&#10;        });&#10;        but_stop.addActionListener(new ActionListener() {&#10;          public void actionPerformed(ActionEvent e) {&#10;            l.setText(&quot;&gt;&gt; stoped pressed...  &lt;&lt;&quot;);&#10;&#9;    stop_selected=true;&#10;          }&#10;        });&#10;        but_resume.addActionListener(new ActionListener() {&#10;          public void actionPerformed(ActionEvent e) {&#10;            l.setText(&quot;&gt;&gt; resume pressed...  &lt;&lt;&quot;);&#10;&#9;    resume_selected=true;&#10;          }&#10;        });&#10;        but_power.addActionListener(new ActionListener() {&#10;          public void actionPerformed(ActionEvent e) {&#10;            l.setText(&quot;&gt;&gt; power pressed...  &lt;&lt;&quot;);&#10;&#9;    power_down_selected=true;&#10;          }&#10;        });&#10;        setLayout(new FlowLayout(FlowLayout.CENTER));&#10;        setSize(200, 400);&#10;        setVisible(true);&#10;        setDefaultCloseOperation(EXIT_ON_CLOSE);&#10;      }&#10;    }).start();&#10;&#10;&#10;//return true, just runs once&#10;return true;">
+      <graphics>
+        <position x="115" y="65"/>
+      </graphics>
+      <name>
+        <text>Wash_initialization</text>
+        <graphics>
+          <offset x="0" y="-40"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <arc id="o91" source="t85" target="p81">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="494" y="160"/>
+        <position x="494" y="189"/>
+      </graphics>
+    </arc>
+    <arc id="o93" source="t86" target="p82">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="356" y="330"/>
+        <position x="368" y="380"/>
+      </graphics>
+    </arc>
+    <arc id="o290" source="t254" target="p249">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="269" y="880"/>
+        <position x="468" y="644"/>
+      </graphics>
+    </arc>
+    <arc id="i58" source="p48" target="t53">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="852" y="233"/>
+        <position x="879" y="260"/>
+      </graphics>
+    </arc>
+    <arc id="o99" source="t87" target="p97">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="513" y="420"/>
+        <position x="583" y="378"/>
+      </graphics>
+    </arc>
+    <arc id="o288" source="t253" target="p254">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="440" y="1253"/>
+        <position x="300" y="1246"/>
+      </graphics>
+    </arc>
+    <arc id="o321" source="t274" target="p264">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="620" y="1400"/>
+        <position x="700" y="1426"/>
+      </graphics>
+    </arc>
+    <place id="p254" placeCODE="complete_wash_selected=false;&#10;is_washing =false;&#10;brushes_stop_working();&#10;&#10;&#10;trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 2, false);&#10;v = trab2.Hardware.setBitValue(v, 1, false);&#10;&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;return true;">
+      <graphics>
+        <position x="275" y="1245"/>
+      </graphics>
+      <name>
+        <text>stop_complete_wash</text>
+        <graphics>
+          <offset x="120" y="60"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o286" source="t251" target="p253">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="456" y="1100"/>
+        <position x="466" y="1130"/>
+      </graphics>
+    </arc>
+    <place id="p253" placeCODE="go_left();&#10;up_down_behaviour=true;&#10;&#10;return true;">
+      <graphics>
+        <position x="475" y="1155"/>
+      </graphics>
+      <name>
+        <text>go_left2</text>
+        <graphics>
+          <offset x="90" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o19" source="t15" target="p13">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="165" y="370"/>
+        <position x="165" y="399"/>
+      </graphics>
+    </arc>
+    <arc id="i100" source="p97" target="t88">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="605" y="339"/>
+        <position x="605" y="280"/>
+      </graphics>
+    </arc>
+    <arc id="i60" source="p49" target="t54">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="856" y="319"/>
+        <position x="887" y="340"/>
+      </graphics>
+    </arc>
+    <transition id="t292">
+      <graphics>
+        <position x="295" y="1635"/>
+      </graphics>
+      <name>
+        <text>t292</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+      <guard>
+        <text>return true;</text>
+      </guard>
+    </transition>
+    <arc id="i62" source="p50" target="t55">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="847" y="406"/>
+        <position x="895" y="430"/>
+      </graphics>
+    </arc>
+    <arc id="i64" source="p51" target="t56">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="855" y="500"/>
+        <position x="897" y="530"/>
+      </graphics>
+    </arc>
+    <arc id="o280" source="t248" target="p250">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="485" y="710"/>
+        <position x="485" y="749"/>
+      </graphics>
+    </arc>
+    <arc id="i67" source="p52" target="t66">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="827" y="570"/>
+        <position x="736" y="270"/>
+      </graphics>
+    </arc>
+    <place id="p252" placeCODE="go_right();&#10;up_down_behaviour=true;&#10;&#10;return true;">
+      <graphics>
+        <position x="475" y="1045"/>
+      </graphics>
+      <name>
+        <text>go_right2</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o284" source="t250" target="p252">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="456" y="980"/>
+        <position x="467" y="1020"/>
+      </graphics>
+    </arc>
+    <place id="p251" placeCODE="go_left();&#10;up_down_behaviour=true;&#10;&#10;return true;">
+      <graphics>
+        <position x="475" y="915"/>
+      </graphics>
+      <name>
+        <text>go_left1</text>
+        <graphics>
+          <offset x="90" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p250" placeCODE="go_right();&#10;up_down_behaviour=true;&#10;brushes_working();&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="485" y="775"/>
+      </graphics>
+      <name>
+        <text>go_right1</text>
+        <graphics>
+          <offset x="100" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o282" source="t249" target="p251">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="475" y="840"/>
+        <position x="475" y="889"/>
+      </graphics>
+    </arc>
+    <arc id="o21" source="t16" target="p14">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="75" y="480"/>
+        <position x="142" y="513"/>
+      </graphics>
+    </arc>
+    <place id="p245" placeCODE="return true;">
+      <graphics>
+        <position x="835" y="75"/>
+      </graphics>
+      <name>
+        <text>SIMPLE_WASH</text>
+        <graphics>
+          <offset x="0" y="-40"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <arc id="o398" source="t280" target="p293">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="99" y="1730"/>
+        <position x="156" y="1786"/>
+      </graphics>
+    </arc>
+    <arc id="o23" source="t17" target="p13">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="246" y="470"/>
+        <position x="187" y="437"/>
+      </graphics>
+    </arc>
+    <place id="p49" placeCODE="brushes_stop_working();&#10;&#10;trab2.Hardware.enter_critical_area();&#10;&#10;int v = trab2.Hardware.s_read_port(2);&#10;v = trab2.Hardware.setBitValue(v, 0, false);&#10;v = trab2.Hardware.setBitValue(v, 2, true);&#10;v = trab2.Hardware.setBitValue(v, 3, false);&#10;trab2.Hardware.s_write_port(2, v);&#10;&#10;trab2.Hardware.exit_critical_area();&#10;&#10;&#10;&#10;return true;">
+      <graphics>
+        <position x="835" y="305"/>
+      </graphics>
+      <name>
+        <text>go_up</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <place id="p249" placeCODE="return true;">
+      <graphics>
+        <position x="485" y="625"/>
+      </graphics>
+      <name>
+        <text>COMPLETE_WASH</text>
+        <graphics>
+          <offset x="120" y="20"/>
+        </graphics>
+      </name>
+      <initialMarking>
+        <text>1</text>
+      </initialMarking>
+    </place>
+    <place id="p48" placeCODE="&#10;go_right();&#10;up_down_behaviour=true;&#10;brushes_working();&#10;&#10;return true;">
+      <graphics>
+        <position x="835" y="215"/>
+      </graphics>
+      <name>
+        <text>go_rigth</text>
+        <graphics>
+          <offset x="50" y="0"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="o312" source="t270" target="p265">
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="706" y="1510"/>
+        <position x="717" y="1550"/>
+      </graphics>
+    </arc>
+    <place id="p129" placeCODE="return true;">
+      <graphics>
+        <position x="375" y="275"/>
+      </graphics>
+      <name>
+        <text>p129</text>
+        <graphics>
+          <offset x="53" y="-4"/>
+        </graphics>
+      </name>
+    </place>
+    <arc id="i456" source="p313" target="t292">
+      <expression>
+        <text>getTokenSet().size()&gt;0</text>
+      </expression>
+      <expression>
+        <text>1</text>
+      </expression>
+      <graphics>
+        <position x="320" y="1673"/>
+        <position x="298" y="1640"/>
+      </graphics>
+    </arc>
+  </net>
+</pnml>
